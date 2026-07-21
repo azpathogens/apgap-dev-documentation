@@ -48,6 +48,24 @@ Copyright &copy; 2026 APGAP Development Team
 #   { "Get started" = "index.md" },
 #   { "Markdown in 5min" = "markdown.md" },
 # ]
+nav = [
+  {"Home" = [
+    "index.md",
+    { "Quickstart" = [
+        "quick-start/index.md",
+        "quick-start/backend.md",
+        "quick-start/frontend.md"
+      ]
+    },
+    {"Core Concepts" = [
+      "core-concepts/index.md",
+      { "Backend" = [
+        "core-concepts/backend/celery_tasks/_index.md"
+      ]}
+    ]}
+  ]},
+  {"Workflows" = "workflows/scrubber.md"}
+]
 
 # With the "extra_css" option you can add your own CSS styling to customize
 # your Zensical project according to your needs. You can add any number of
@@ -216,7 +234,7 @@ features = [
     # below the header for viewports above 1220px, but remain as-is on mobile.
     # https://zensical.org/docs/setup/navigation/#navigation-tabs
     #"navigation.tabs",
-    "navigation.tabs",
+    #"navigation.tabs",
 
     # When sticky tabs are enabled, navigation tabs will lock below the header
     # and always remain visible when scrolling down.
@@ -348,3 +366,4 @@ combine_header_slug = true
 [project.markdown_extensions.pymdownx.tasklist]
 custom_checkbox = true
 [project.markdown_extensions.pymdownx.tilde]
+[project.markdown_extensions.pymdownx.snippets]

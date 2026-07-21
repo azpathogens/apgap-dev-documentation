@@ -1,6 +1,10 @@
+---
+title: Frontend Setup
+---
+
 # APGAP Frontend
 
-## Setup
+## Development Setup
 
 Configuration files for the frontend are in the folder `src/environments`. There a different files for different environments (e.g. `environment.local.ts`, `environment.development.ts` and `environment.production.ts`). Each file has the following properties:
 
