@@ -10,7 +10,7 @@ docker compose -f docker-compose.local.yml run django python manage.py createsup
 
 Follow the prompts to set email and password.
 
-**Important:** You must add your email domain to the whitelist before creating a superuser. See [Domain Whitelist Setup](/core-concepts/quickstart_guide/#domain-whitelist-setup).
+**Important:** You must add your email domain to the whitelist before creating a superuser. See [Domain Whitelist Setup](/core-concepts/backend/domain-whitelist).
 
 ### Using Administrative Panel
 
@@ -18,11 +18,11 @@ Follow the prompts to set email and password.
 - Log in with your superuser credentials
 - Manage users, permissions, and application data
 - **Key admin sections:**
-  - **Users**: Manage user accounts and permissions
-  - **Domain Whitelist**: Manage allowed email domains for user registration
-  - **Organizations**: Manage organizations
-  - **Labs**: Manage laboratories and lab memberships
-  - **Projects**: Manage projects and project memberships
+    - **Users**: Manage user accounts and permissions
+    - **Domain Whitelist**: Manage allowed email domains for user registration
+    - **Organizations**: Manage organizations
+    - **Labs**: Manage laboratories and lab memberships
+    - **Projects**: Manage projects and project memberships
 
 ## User Management
 
@@ -40,15 +40,7 @@ The application uses a role-based access control (RBAC) model with the following
 
 #### Special Permissions
 
-- **AZDHS** users have elevated privileges that allow them to assign datasets directly to their own projects without requiring approval from the dataset owner.
-
-These roles are automatically created when the Django container is initialized via the management command:
-
-```bash
-python manage.py setup_permission_groups
-```
-
-Role definitions can be found in `asu_apgap/utils/permissions.py` and the management command is located at `asu_apgap/users/management/commands/setup_permission_groups.py`.
+Users from certain organizations can be given special permissions that allows them to create datasets from files passing specific filters without prior owner approval.
 
 ## Database Structure
 
@@ -56,7 +48,7 @@ The application uses Django ORM with PostgreSQL. The database schema consists of
 
 ![Entity Relationship Diagram](/images/apgap_erd.png)
 
-For detailed field definitions, see [Database Entity Relationship Diagram](/core-concepts/database).
+For detailed field definitions, see [Database Entity Relationship Diagram](/core-concepts/backend/database).
 
 ## API Endpoints
 

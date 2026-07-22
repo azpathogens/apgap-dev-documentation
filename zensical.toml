@@ -54,13 +54,20 @@ nav = [
     { "Quickstart" = [
         "quick-start/index.md",
         "quick-start/backend.md",
-        "quick-start/frontend.md"
+        "quick-start/frontend.md",
+        "quick-start/development_workflow.md",
       ]
     },
     {"Core Concepts" = [
       "core-concepts/index.md",
       { "Backend" = [
-        "core-concepts/backend/celery_tasks/_index.md"
+        "core-concepts/backend/administration.md",
+        "core-concepts/backend/domain-whitelist.md",
+        "core-concepts/backend/database.md",
+        "core-concepts/backend/datamodel.md",
+        "core-concepts/backend/api_endpoints.md",
+        "core-concepts/backend/celery_tasks/_index.md",
+        "core-concepts/backend/deployment.md"
       ]}
     ]}
   ]},

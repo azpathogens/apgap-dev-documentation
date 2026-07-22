@@ -1,3 +1,7 @@
+---
+title: Database Structure
+---
+
 # Database Entity Relationship Diagram
 
 This document provides a comprehensive view of the ASU APGAP database schema.

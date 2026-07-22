@@ -1,8 +1,10 @@
 
-# domain_whitelist backend app
+# Domain Whitelisting
 
 A small Django/DRF app providing CRUD endpoints for whitelisted domains,
 mirroring your `metadata-tags` pattern.
+
+In APGAP this app is used to restrict from what domains email addresses for new accounts are being accepted.
 
 ## Install
 
