@@ -39,14 +39,16 @@ The entrypoint script runs first and handles database connectivity:
 2. `migrate` - Applies database migrations
 3. `ensure_adhs_organization` - Creates the default ADHS organization if it doesn't exist
 4. `setup_permission_groups` - Creates/updates permission groups and their associated permissions
-5. Starts Gunicorn WSGI server on port 8000
+5. `seed_metadata_templates`, `seed_pathogens`, `seed_validation_rules` - Seeds the metadata vocabulary, in that order
+6. Starts Gunicorn WSGI server on port 8000
 
 **Local Development** (`compose/local/django/start`):
 
 1. `migrate` - Applies database migrations
 2. `ensure_adhs_organization` - Creates the default ADHS organization
 3. `setup_permission_groups` - Creates/updates permission groups
-4. Starts Django development server with `runserver_plus` on port 8000
+4. `seed_metadata_templates`, `seed_pathogens`, `seed_validation_rules` - Seeds the metadata vocabulary, in that order
+5. Starts Django development server with `runserver_plus` on port 8000
 
 #### Key Management Commands
 
@@ -55,6 +57,10 @@ The entrypoint script runs first and handles database connectivity:
 | `ensure_adhs_organization` | Creates the default ADHS organization required for the platform                                             |
 | `setup_permission_groups`  | Creates all permission groups (Platform Admin, Lab Director, etc.) with their associated Django permissions |
 | `seed_metadata_templates`  | Seeds/updates metadata templates, keys, values, and source types for file metadata                          |
+| `seed_pathogens`           | Seeds the Pathogen registry with reportable pathogens (also populates the pathogen dropdown)                |
+| `seed_validation_rules`    | Seeds/updates field- and cross-field validation rules for metadata templates                                |
+
+> Both start scripts run these three on every container start, so a normal setup needs none of them by hand. Order matters: `seed_metadata_templates` first (it creates the keys, source types, and the pathogen key/template), then `seed_pathogens`, then `seed_validation_rules`.
 
 ### Metadata Template Seeding
 
@@ -82,28 +88,37 @@ The metadata system consists of several interconnected models:
 
 The management command (`asu_apgap/metadatatags/management/commands/seed_metadata_templates.py`) performs the following operations in a single atomic transaction:
 
-1. **Source Types Creation**: Creates 12 predefined source types (Human Host, Companion Animal Host, Wildlife Host, Vectors, Livestock AG Animal Host, Air, Produce AG, Food Product, Surface, Soil Sample, Water Sample, Wastewater Sample)
+1. **Key Rename Migration**: Moves existing user data from any keys listed in `KEY_RENAMES` onto their new names before new keys are created
 
-2. **Keys & Values Collection**: Collects all unique metadata keys and values from two data structures:
+2. **Source Types Creation**: Creates 12 predefined source types (Human Host, Companion Animal Host, Wildlife Host, Vectors, Livestock AG Animal Host, Air, Produce AG, Food Product, Surface, Soil Sample, Water Sample, Wastewater Sample)
+
+3. **Keys & Values Collection**: Collects all unique metadata keys and values from three data structures:
    - `ALL_SEQUENCES`: Core metadata fields that apply to **all** source types (e.g., Sample ID, Pathogen name, Date Collected, Sequencing instrument)
    - `SOURCE_TYPE_METADATA`: Source-type-specific fields (e.g., "Biospecimen type" for Human Host, "Water source" for Water Sample)
+   - `POST_ANALYSIS_CORE`: Fields for post-analysis templates
 
-3. **Bulk Key Creation**: Creates `Key` objects with normalized names (uppercase, trimmed) and appropriate data types mapped from field types:
+4. **Bulk Key Creation**: Creates `Key` objects with normalized names (uppercase, trimmed) and appropriate data types mapped from field types:
    - `text`, `text_field`, `text_input` → `TEXT`
    - `select`, `multi_select` → `SELECT`
    - `date`, `time` → `DATE`
    - `number` → `NUMBER`
 
-4. **Bulk Value Creation**: Creates `Value` objects for all predefined dropdown/select options
+5. **Bulk Value Creation**: Creates `Value` objects for all predefined dropdown/select options. The "Sequencing lab (originating lab)" options come from the active labs in the database rather than a fixed list
 
-5. **Template Creation**: Creates `MetadataTemplate` records that define:
+6. **Template Creation**: Creates `MetadataTemplate` records that define:
    - Which key applies to which source type (or `None` for core templates)
    - Whether the field is required
    - Whether multiple values can be selected
    - Display sort order
    - The UI field type (select, multi_select, text, etc.)
 
-6. **Template Options Creation**: Links predefined `Value` objects to their corresponding `MetadataTemplate` records for select/multi-select fields
+7. **Template Options Creation**: Links predefined `Value` objects to their corresponding `MetadataTemplate` records for select/multi-select fields
+
+8. **Option Alias Merging**: Merges any alternate spellings a field declares in its `aliases` map onto the matching template options
+
+9. **Stale Data Cleanup**: Removes keys and templates that are no longer in the seed data, skipping any that user-submitted metadata still references
+
+10. **Pathogen Key Flagging**: Flags the seed field marked `is_pathogen_key`, which is the key the data catalogue's pathogen column and filter resolve
 
 #### Data Structure Definition
 
@@ -113,8 +128,14 @@ The metadata schemas are defined as Python dictionaries in the management comman
 # Core fields applied to ALL sequences (source_type=None)
 ALL_SEQUENCES = {
     "keys": [
-        {"name": "Sample ID", "required": True, "type": "text", "values": []},
-        {"name": "Pathogen/organism name", "required": True, "type": "multi_select", "values": ["SARS-CoV-2", "Influenza", ...]},
+        {"name": "Sample ID", "required": False, "type": "text", "values": []},
+        {
+            "name": "Pathogen/organism name (or metagenomic)",
+            "required": True,
+            "type": "multi_select",
+            "is_pathogen_key": True,
+            "values": ["SARS-CoV-2", "Influenza", ...],
+        },
         {"name": "Date Collected", "required": True, "type": "date", "values": []},
         # ... more fields
     ]
@@ -125,7 +146,7 @@ SOURCE_TYPE_METADATA = {
     "HUMAN_HOST": {
         "keys": [
             {"name": "Biospecimen type", "required": True, "type": "select", "values": ["Nasopharyngeal swab", "Saliva", ...]},
-            {"name": "Age (in years)", "required": False, "type": "number", "values": []},
+            {"name": "Age (years)", "required": False, "type": "number", "values": []},
             # ... more fields
         ]
     },
@@ -161,4 +182,22 @@ To add or modify metadata templates:
    ```
 
 The command will output a summary of created/updated records upon completion.
+
+### Sample Data
+
+Seeding gives you the metadata vocabulary, but no labs, projects, or files. A fresh local database is therefore empty, and most of the UI has nothing to show. `populate_dummy_data` fills it with generated organizations, labs, projects, datasets, files, metadata tags, and requests to develop against:
+
+```bash
+docker compose -f docker-compose.local.yml run django python manage.py populate_dummy_data --count 5
+```
+
+This is a local development aid and has no part in any deployment. It re-runs `seed_metadata_templates` and `seed_pathogens` before generating, so the files it creates are tagged against the real vocabulary rather than look-alike keys; both are idempotent, so the repeat costs nothing.
+
+The command names the database it is about to write to and asks you to confirm before it creates anything, so run it from an interactive terminal. If stdin is closed (in CI, or with stdin redirected from `/dev/null`), it reads that as a no and aborts rather than proceeding unattended.
+
+`--count` is a multiplier, not a row count. At 5 you get 15 labs, around 50 projects, and around 150 files, which is enough to exercise every screen. The per-lab and per-project numbers are randomised, so counts vary slightly between runs. Larger values scale every table.
+
+`--clear` wipes the generated data before repopulating, which is how you re-run it at a different `--count`. It is guarded twice: the command refuses to clear unless `DEBUG` is on, which it is in local settings and is not in any deployed environment, and it makes you type the database name at a second prompt before anything is deleted.
+
+Your superuser survives a `--clear`, but every domain whitelist entry is deleted and only `asu.edu`, `azdhs.gov`, `tgen.org`, `arizona.edu`, and `ua.edu` come back. If you whitelisted something else to create your superuser (`gmail.com`, for instance), add it back afterwards.
 
