@@ -14,7 +14,8 @@ Follow these steps in order to get local development up and running:
 5. **Run migrations**: `docker compose -f docker-compose.local.yml run django python manage.py migrate`
 6. **Add your email domain to the whitelist** (see [Domain Whitelist Setup](#domain-whitelist-setup) below) - **Required before creating any users**
 7. **Create a superuser**: `docker compose -f docker-compose.local.yml run django python manage.py createsuperuser`
-8. Access the application at **http://localhost:8000**
+8. *(Optional)* **Populate sample data**: `docker compose -f docker-compose.local.yml run django python manage.py populate_dummy_data --count 5` - fills the empty database so the UI has something to show (see [Sample Data](/core-concepts/backend/deployment#sample-data))
+9. Access the application at **http://localhost:8000**
 
 ## Local Development Environment
 
