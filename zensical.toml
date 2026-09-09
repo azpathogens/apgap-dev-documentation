@@ -67,7 +67,11 @@ nav = [
         "core-concepts/backend/datamodel.md",
         "core-concepts/backend/api_endpoints.md",
         "core-concepts/backend/celery_tasks/_index.md",
-        "core-concepts/backend/deployment.md"
+        "core-concepts/backend/deployment.md",
+        { "Integrations" = [
+            "core-concepts/backend/integrations/seqera.md",
+          ]
+        }
       ]}
     ]}
   ]},
