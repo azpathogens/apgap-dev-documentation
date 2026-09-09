@@ -1,7 +1,3 @@
----
-
----
-
 # Data Models
 
 APGAP is built on a modular architecture composed of several distinct classes, each designed to handle specific data entities and logical operations.
