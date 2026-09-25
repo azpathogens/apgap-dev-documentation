@@ -57,13 +57,13 @@ The application uses a service account to interact with Google Cloud Services:
 - The keyfile should be placed at: `secrets/keyfile_DEV.json`
 - This file is also included in `.gitignore` and should never be committed to the repository
 
-### Domain Whitelist Setup
+### Domain Allowlist Setup
 
-The application validates user email addresses against a whitelist of approved domains. **All users, including superusers, must have an email domain in the whitelist before they can be created.** You must add at least one domain to the whitelist before creating any users.
+The application validates user email addresses against the domain allowlist. **All users, including superusers, must have an email domain in the domain allowlist before they can be created.** You must add at least one domain to the allowlist before creating any users.
 
 #### Option 1: Via Django Shell (Recommended for Initial Setup)
 
-Since you need to whitelist a domain before creating a superuser, use the Django shell for initial setup:
+Since you need to add a domain to the domain allowlist before creating a superuser, use the Django shell for initial setup:
 
 ```bash
 docker compose -f docker-compose.local.yml run django python manage.py shell_plus
@@ -72,10 +72,10 @@ docker compose -f docker-compose.local.yml run django python manage.py shell_plu
 Then in the shell:
 
 ```python
-from asu_apgap.domain_whitelist.models import DomainWhitelist
+from asu_apgap.domain_allowlist.models import DomainAllowlist
 
 # Add your email domain (replace with your actual domain)
-DomainWhitelist.objects.create(domain="asu.edu", description="Arizona State University")
+DomainAllowlist.objects.create(domain="asu.edu", description="Arizona State University")
 
 # Or add multiple domains
 domains_to_add = [
@@ -85,7 +85,7 @@ domains_to_add = [
     ("gmail.com", "Gmail (for testing)"),
 ]
 for domain, description in domains_to_add:
-    DomainWhitelist.objects.get_or_create(domain=domain, defaults={"description": description})
+    DomainAllowlist.objects.get_or_create(domain=domain, defaults={"description": description})
 ```
 
 Exit the shell with `exit()`, then proceed to create your superuser.
@@ -96,8 +96,8 @@ Once you have a superuser:
 
 1. Access the admin interface at **http://localhost:8000/admin**
 2. Log in with your superuser credentials
-3. Navigate to **Domain Whitelist** in the sidebar
-4. Click **Add Domain Whitelist**
+3. Navigate to **Domain Allowlist** in the sidebar
+4. Click **Add Domain Allowlist**
 5. Enter the domain (e.g., `asu.edu`, `gmail.com`, `example.com`)
 6. Optionally add a description
 7. Click **Save**
@@ -105,7 +105,7 @@ Once you have a superuser:
 #### Option 3: Via API (Requires Authentication)
 
 ```bash
-curl -X POST http://localhost:8000/api/domain-whitelist/ \
+curl -X POST http://localhost:8000/api/domain-allowlist/ \
   -H "Authorization: Bearer your-access-token" \
   -H "Content-Type: application/json" \
   -d '{"domain": "example.edu", "description": "Example University"}'
@@ -224,7 +224,7 @@ docker compose -f docker-compose.local.yml run django python manage.py createsup
 
 Follow the prompts to set email and password.
 
-**Important:** You must add your email domain to the whitelist before creating a superuser. See [Domain Whitelist Setup](#domain-whitelist-setup).
+**Important:** You must add your email domain to the allowlist before creating a superuser. See [Domain Allowlist Setup](#domain-allowlist-setup).
 
 ### Using Administrative Panel
 
@@ -233,7 +233,7 @@ Follow the prompts to set email and password.
 - Manage users, permissions, and application data
 - **Key admin sections:**
   - **Users**: Manage user accounts and permissions
-  - **Domain Whitelist**: Manage allowed email domains for user registration
+  - **Domain Allowlist**: Manage allowed email domains for user registration
   - **Organizations**: Manage organizations
   - **Labs**: Manage laboratories and lab memberships
   - **Projects**: Manage projects and project memberships
@@ -319,7 +319,7 @@ The docs container will watch for changes and automatically rebuild when source 
 | Access Requests     | `/api/access-requests/`                              | File access request workflow                |
 | Notifications       | `/api/notifications/`                                | User notifications and preferences          |
 | Metadata            | `/api/metadata-tags/`, `/api/metadata-requirements/` | Metadata tags and templates                 |
-| Domain Whitelist    | `/api/domain-whitelist/`                             | Allowed email domains                       |
+| Domain Allowlist    | `/api/domain-allowlist/`                             | Allowed email domains                       |
 | Deletions           | `/api/deletions/`                                    | Archive requests and deletion audit         |
 
 For complete endpoint documentation with request/response examples, see [API ENDPOINTS REFERENCE](/core-concepts/api_endpoints/).
@@ -574,9 +574,9 @@ The command will output a summary of created/updated records upon completion.
 
 #### "Domain 'x' is not allowed" Error
 
-This error occurs when trying to create a user with an email domain that isn't in the whitelist.
+This error occurs when trying to create a user with an email domain that isn't in the domain allowlist.
 
-**Solution:** Add the domain to the whitelist via Django admin or shell. See [Domain Whitelist Setup](#domain-whitelist-setup).
+**Solution:** Add the domain to the allowlist via Django admin or shell. See [Domain Allowlist Setup](#domain-allowlist-setup).
 
 #### Google OAuth Not Working
 

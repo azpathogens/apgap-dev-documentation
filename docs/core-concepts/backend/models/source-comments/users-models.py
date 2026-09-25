@@ -53,7 +53,7 @@ class User(AbstractUser):
     def is_domain_allowed(self) -> bool:
         """
         Existing users: always allowed.
-        New users: allowed only if their email domain is in the whitelist.
+        New users: allowed only if their email domain is in the domain allowlist.
         """
 
     def get_projects(self, lab=None):
