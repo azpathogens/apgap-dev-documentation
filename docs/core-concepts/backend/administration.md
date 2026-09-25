@@ -10,7 +10,7 @@ docker compose -f docker-compose.local.yml run django python manage.py createsup
 
 Follow the prompts to set email and password.
 
-**Important:** You must add your email domain to the whitelist before creating a superuser. See [Domain Whitelist Setup](/core-concepts/backend/domain-whitelist).
+**Important:** You must add your email domain to the allowlist before creating a superuser. See [Domain Allowlist Setup](/core-concepts/backend/domain-allowlist).
 
 ### Using Administrative Panel
 
@@ -19,7 +19,7 @@ Follow the prompts to set email and password.
 - Manage users, permissions, and application data
 - **Key admin sections:**
     - **Users**: Manage user accounts and permissions
-    - **Domain Whitelist**: Manage allowed email domains for user registration
+    - **Domain Allowlist**: Manage allowed email domains for user registration
     - **Organizations**: Manage organizations
     - **Labs**: Manage laboratories and lab memberships
     - **Projects**: Manage projects and project memberships
@@ -97,7 +97,7 @@ The docs container will watch for changes and automatically rebuild when source 
 | Access Requests     | `/api/access-requests/`                              | File access request workflow                |
 | Notifications       | `/api/notifications/`                                | User notifications and preferences          |
 | Metadata            | `/api/metadata-tags/`, `/api/metadata-requirements/` | Metadata tags and templates                 |
-| Domain Whitelist    | `/api/domain-whitelist/`                             | Allowed email domains                       |
+| Domain Allowlist    | `/api/domain-allowlist/`                             | Allowed email domains                       |
 | Deletions           | `/api/deletions/`                                    | Archive requests and deletion audit         |
 
 For complete endpoint documentation with request/response examples, see [API ENDPOINTS REFERENCE](/core-concepts/api_endpoints/).

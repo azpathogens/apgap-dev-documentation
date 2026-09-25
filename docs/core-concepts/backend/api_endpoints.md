@@ -1309,13 +1309,13 @@ validate_only: false
 
 ---
 
-## Domain Whitelist
+## Domain Allowlist
 
-**Base Path:** `/api/domain-whitelist/`
+**Base Path:** `/api/domain-allowlist/`
 
-**GET `/api/domain-whitelist/`**
+**GET `/api/domain-allowlist/`**
 
-List whitelisted domains.
+List allowed domains.
 
 **Response:**
 
@@ -1331,9 +1331,9 @@ List whitelisted domains.
 ]
 ```
 
-**POST `/api/domain-whitelist/`**
+**POST `/api/domain-allowlist/`**
 
-Add domain to whitelist.
+Add domain to the domain allowlist.
 
 **Request:**
 

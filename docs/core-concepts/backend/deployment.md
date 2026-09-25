@@ -199,5 +199,5 @@ The command names the database it is about to write to and asks you to confirm b
 
 `--clear` wipes the generated data before repopulating, which is how you re-run it at a different `--count`. It is guarded twice: the command refuses to clear unless `DEBUG` is on, which it is in local settings and is not in any deployed environment, and it makes you type the database name at a second prompt before anything is deleted.
 
-Your superuser survives a `--clear`, but every domain whitelist entry is deleted and only `asu.edu`, `azdhs.gov`, `tgen.org`, `arizona.edu`, and `ua.edu` come back. If you whitelisted something else to create your superuser (`gmail.com`, for instance), add it back afterwards.
+Your superuser survives a `--clear`, but every domain allowlist entry is deleted and only `asu.edu`, `azdhs.gov`, `tgen.org`, `arizona.edu`, and `ua.edu` come back. If you allowed another domain to create your superuser (`gmail.com`, for instance), add it back afterwards.
 
