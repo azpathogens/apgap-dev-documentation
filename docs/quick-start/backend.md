@@ -127,3 +127,69 @@ curl -X POST http://localhost:8000/api/domain-whitelist/ \
   -H "Content-Type: application/json" \
   -d '{"domain": "example.edu", "description": "Example University"}'
 ```
+
+### Local Services
+
+`docker compose -f docker-compose.local.yml up` starts five containers. All Django based containers share the same image and the env files in `.envs/.local/`.
+
+| Service         | Container                       | Port   | Command                                                                                             |
+| --------------- | ------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `django`        | `asu_apgap_local_django`        | `8000` | `/start`: runs migrations and seed commands, then `runserver_plus`                                  |
+| `celery_worker` | `asu_apgap_local_celery_worker` |        | `/start-celeryworker`: one worker consuming both the `celery` and `ingest` queues                   |
+| `celery_beat`   | `asu_apgap_local_celery_beat`   |        | `/start-celerybeat`: beat with the `django_celery_beat` database scheduler                          |
+| `postgres`      | `asu_apgap_local_postgres`      |        | PostgreSQL, data kept in the `asu_apgap_local_postgres_data` volume                                 |
+| `redis`         | `asu_apgap_local_redis`         | `6379` | Redis 7.2, used as the Celery broker and result backend and for distributed locks                  |
+
+On every start, `/start` runs these commands before the server comes up, so you do not need to run them by hand:
+
+```bash
+python manage.py migrate
+python manage.py ensure_adhs_organization
+python manage.py setup_permission_groups
+python manage.py seed_metadata_templates
+python manage.py seed_pathogens
+python manage.py seed_validation_rules
+```
+
+The source tree is mounted into each container, so code changes reload `django` automatically. The Celery containers do not reload: restart them after changing a task.
+
+```bash
+docker compose -f docker-compose.local.yml restart celery_worker celery_beat
+```
+
+### Running Tests
+
+Tests use pytest with the `config.settings.test` settings module:
+
+```bash
+docker compose -f docker-compose.local.yml run --rm django pytest
+```
+
+Run a single file or test by passing its path:
+
+```bash
+docker compose -f docker-compose.local.yml run --rm django pytest asu_apgap/labs/tests/test_views.py
+docker compose -f docker-compose.local.yml run --rm django pytest asu_apgap/labs/tests/test_views.py -k test_name
+```
+
+The test database is kept between runs (`--reuse-db`). After adding or changing migrations, or after rebuilding the image, recreate it once:
+
+```bash
+docker compose -f docker-compose.local.yml run --rm django pytest --create-db
+```
+
+CI runs the same suite on every pull request and push to `development`, `uat`, and `main` (see [Development Workflow](/quick-start/development_workflow/)).
+
+### Linting
+
+Linting runs through pre-commit hooks: ruff (lint and format), django-upgrade, djLint for templates, and the standard pre-commit checks (trailing whitespace, YAML/JSON/TOML syntax, private keys). Install the hooks once so they run on every commit:
+
+```bash
+pre-commit install
+```
+
+Run them against the whole repository, the same way CI does:
+
+```bash
+pre-commit run --all-files
+```
