@@ -1025,42 +1025,6 @@ Retrieve analytical dataset with files.
 }
 ```
 
-**POST `/api/analytical-datasets/{id}/copy_file/`**
-
-Copy file to dataset.
-
-**Request:**
-
-```json
-{
-  "source_file_id": 5
-}
-```
-
-**Response (if auto-approved):**
-
-```json
-{
-  "id": 10,
-  "gcs_file_path": "copied-file.fastq",
-  "file_type": "fastq",
-  "file_size": 1048576,
-  "status": "PRIMARY",
-  "original_file_id": 5,
-  "metadata_tags": [...]
-}
-```
-
-**Response (if pending approval):**
-
-```json
-{
-  "message": "Access request has been created and is pending approval.",
-  "access_request_id": 1,
-  "status": "PENDING"
-}
-```
-
 **POST `/api/analytical-datasets/{id}/approve/`**
 
 Approve pending access requests (Lab Director).
@@ -1095,27 +1059,6 @@ Deny pending access requests (Lab Director).
 }
 ```
 
-**POST `/api/analytical-datasets/{id}/request_access_to_files/`**
-
-Request access to multiple files.
-
-**Request:**
-
-```json
-{
-  "files": [1, 2, 3, 4, 5]
-}
-```
-
-**Response:**
-
-```json
-{
-  "created": [{ "id": 1, "file_id": 1, "status": "PENDING" }],
-  "existing": [{ "id": 2, "file_id": 2, "status": "APPROVED" }]
-}
-```
-
 **Additional Endpoints**
 
 "Dataset access" means Platform Admin or access to the dataset's project. "Subscription writer" means Platform Admin, the dataset's creator, or a Lab Director of the dataset's lab.
@@ -1136,66 +1079,6 @@ Request access to multiple files.
 | POST             | `/api/analytical-datasets/{id}/subscriptions/{sub_id}/backfill/` | Subscription writer                                        | Request the files the rule matches right now. 400 if the rule is inactive or the dataset is being deleted. |
 
 Subscription fields: `name`, `description`, `metadata_filters`, `metadata_filter_logic` (`AND` or `OR`), `source_types`, `allow_cross_lab`, `is_active`.
-
----
-
-## Access Requests
-
-**Base Path:** `/api/access-requests/`
-
-**GET `/api/access-requests/`**
-
-List access requests.
-
-**Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "user": 2,
-    "user_email": "jane@example.com",
-    "user_name": "Jane Smith",
-    "analytical_dataset": 1,
-    "analytical_dataset_name": "Analysis Dataset 1",
-    "file": 5,
-    "file_name": "sample.fastq",
-    "status": "PENDING",
-    "created_at": "2024-01-15T10:30:00Z",
-    "updated_at": "2024-01-15T10:30:00Z"
-  }
-]
-```
-
-**POST `/api/access-requests/`**
-
-Create access request.
-
-**Request:**
-
-```json
-{
-  "user": 2,
-  "analytical_dataset": 1,
-  "file": 5
-}
-```
-
-**POST `/api/access-requests/{id}/approve/`**
-
-Approve access request.
-
-**POST `/api/access-requests/{id}/reject/`**
-
-Reject access request.
-
-**GET `/api/access-requests/my-requests/`**
-
-Get current user's access requests.
-
-**GET `/api/access-requests/pending-approvals/`**
-
-Get pending requests for approval.
 
 ---
 

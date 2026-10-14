@@ -94,7 +94,6 @@ The docs container will watch for changes and automatically rebuild when source 
 | Uploads             | `/api/uploads/`                                      | GUI and batch file uploads                  |
 | Datasets            | `/api/datasets/`                                     | Data catalog (searchable datasets)          |
 | Analytical Datasets | `/api/analytical-datasets/`                          | Project-specific datasets with file copying |
-| Access Requests     | `/api/access-requests/`                              | File access request workflow                |
 | Notifications       | `/api/notifications/`                                | User notifications and preferences          |
 | Metadata            | `/api/metadata-tags/`, `/api/metadata-requirements/` | Metadata tags and templates                 |
 | Domain Whitelist    | `/api/domain-whitelist/`                             | Allowed email domains                       |
