@@ -289,19 +289,34 @@ To access these endpoints, ensure the local development containers are running:
 docker compose -f docker-compose.local.yml up
 ```
 
-### Sphinx Documentation
+### Sphinx API Reference (Optional)
 
-Additional project documentation is available via Sphinx. To build and view the docs:
+The backend repository includes an optional Sphinx project in `docs/` (`conf.py`, `index.rst`, `howto.rst`, `users.rst`). It came with the cookiecutter-django template. You do not need it for development, testing, or deployment, and it is not built in CI or published anywhere.
 
-1. **Build and run the docs container:**
+**What it is for:** Sphinx uses the `autodoc` and `napoleon` extensions to turn backend docstrings (Google or NumPy style) into browsable HTML. It is useful if you want to preview how a model's docstrings and method signatures render.
+
+**How to run it:**
 
 ```bash
 docker compose -f docker-compose.docs.yml up --build
 ```
 
-2. **Access the documentation at:** http://localhost:9000
+Then open http://localhost:9000. The container runs `sphinx-autobuild`, which watches `docs/` and `asu_apgap/` and rebuilds when they change. `conf.py` points Django at an empty SQLite file (`docs/readthedocs.db`), so Postgres does not need to be running.
 
-The docs container will watch for changes and automatically rebuild when source files are modified.
+**What you get:**
+
+| Page    | Source           | Content                                                                         |
+| ------- | ---------------- | ------------------------------------------------------------------------------- |
+| Index   | `docs/index.rst` | Landing page linking the two pages below                                        |
+| How To  | `docs/howto.rst` | Template instructions for writing Sphinx docs                                   |
+| Users   | `docs/users.rst` | Generated reference for `asu_apgap.users.models.User`: fields, properties, and methods with their docstrings |
+
+**Limitations:**
+
+- Only the `users` app is covered. To document another app, add a `.rst` file with an `.. automodule::` directive (see `docs/users.rst`) and list it in the `toctree` in `docs/index.rst`.
+- The Markdown notes in the backend `docs/` folder (`API_ENDPOINTS.md`, `DATABASE_ERD.md`, `CELERY_SCALING_NOTES.md`, and others) are not included. Sphinx has no Markdown parser configured, so read them on GitHub.
+- `docs/howto.rst` is out of date: the `docs` service it mentions is in `docker-compose.docs.yml`, not `docker-compose.local.yml`, and `docs/_source` does not exist.
+- For the REST API, use Swagger (above) instead. It is generated from the live code and covers every endpoint.
 
 ### Main Endpoint Categories
 
