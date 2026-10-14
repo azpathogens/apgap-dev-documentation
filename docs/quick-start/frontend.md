@@ -4,6 +4,23 @@ title: Frontend Setup
 
 # APGAP Frontend
 
+## Prerequisites
+
+- Node.js `^20.19.0`, `^22.12.0`, or `>=24.0.0` (CI and the Docker build use Node 22)
+- npm
+
+Install dependencies from the repository root:
+
+```bash
+npm install
+```
+
+This also installs the Husky git hooks: lint and tests run before each commit, and tests run before each push.
+
+The Angular CLI is installed locally with the project. Run it through npm (`npm start` is the same as `ng serve`) or `npx ng`, or install it globally with `npm install -g @angular/cli`.
+
+**Important:** When you run against your local backend, the frontend and backend must use the same Google OAuth client. `googleOauthClientId` in `src/environments/environment.local.ts` must match `GOOGLE_OAUTH_CLIENT_ID` in the backend `.envs/.local/.secrets`, and the frontend must be served from `http://localhost:4200`, which is the origin the backend allows for CORS, CSRF, and login redirects (`config/settings/local.py`).
+
 ## Development Setup
 
 Configuration files for the frontend are in the folder `src/environments`. There a different files for different environments (e.g. `environment.local.ts`, `environment.development.ts` and `environment.production.ts`). Each file has the following properties:
