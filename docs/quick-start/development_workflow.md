@@ -7,6 +7,20 @@
 - Future plans include dedicated `uat` and `main` branches for UAT and production environments
 - Currently, only the `development` environment has an associated deployment
 
+### Branches and Releases
+
+Both the backend and frontend repositories use three long lived branches:
+
+| Branch        | Purpose                                                            |
+| ------------- | ------------------------------------------------------------------ |
+| `development` | Integration branch. All feature and fix branches merge here        |
+| `uat`         | Staging. `development` is merged into `uat` for acceptance testing |
+| `main`        | Production. `uat` is merged into `main`, which creates a release   |
+
+Changes move forward only, through pull requests: feature branch to `development`, `development` to `uat`, `uat` to `main`.
+
+Name feature branches `<type>/<short-description>-<ticket number>`, where `<type>` matches the commit prefix, for example `feat/action-items-rework-123` or `fix/notification-lab-tagging-456`. The ticket number refers to the issue in the `apgap-development-tickets` repository.
+
 ### CI/CD Pipeline
 
 - GitHub Actions automates testing pipelines
