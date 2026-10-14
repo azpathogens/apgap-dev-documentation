@@ -1,11 +1,11 @@
 """
-Permission classes for domain whitelist API endpoints.
+Permission classes for domain allowlist API endpoints.
 """
 
 
-class DomainWhitelistPermission(permissions.BasePermission):
+class DomainAllowlistPermission(permissions.BasePermission):
     """
-    Permission class for domain whitelist operations.
+    Permission class for domain allowlist operations.
 
     Permissions:
     - Create: Platform Admin only
@@ -21,5 +21,5 @@ class DomainWhitelistPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """
-        Check if user has permission to perform the action on a specific domain whitelist entry.
+        Check if user has permission to perform the action on a specific domain allowlist entry.
         """

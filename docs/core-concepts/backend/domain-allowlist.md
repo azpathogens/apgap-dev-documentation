@@ -1,7 +1,7 @@
 
-# Domain Whitelisting
+# Domain Allowlist
 
-A small Django/DRF app providing CRUD endpoints for whitelisted domains,
+A small Django/DRF app providing CRUD endpoints for allowed domains,
 mirroring your `metadata-tags` pattern.
 
 In APGAP this app is used to restrict from what domains email addresses for new accounts are being accepted.
@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     # ...
     "django_filters",
     "rest_framework",
-    "domain_whitelist",
+    "domain_allowlist",
 ]
 ```
 
@@ -26,24 +26,24 @@ from django.urls import path, include
 
 urlpatterns = [
     # ...
-    path("api/", include("domain_whitelist.urls")),
+    path("api/", include("domain_allowlist.urls")),
 ]
 ```
 
 3) Run migrations:
 
 ```bash
-python manage.py makemigrations domain_whitelist
+python manage.py makemigrations domain_allowlist
 python manage.py migrate
 ```
 
 ## Endpoints (via DRF router)
-- `GET    /api/domain-whitelist/`          list
-- `POST   /api/domain-whitelist/`          create
-- `GET    /api/domain-whitelist/{id}/`     retrieve
-- `PATCH  /api/domain-whitelist/{id}/`     partial update
-- `PUT    /api/domain-whitelist/{id}/`     update
-- `DELETE /api/domain-whitelist/{id}/`     destroy
+- `GET    /api/domain-allowlist/`          list
+- `POST   /api/domain-allowlist/`          create
+- `GET    /api/domain-allowlist/{id}/`     retrieve
+- `PATCH  /api/domain-allowlist/{id}/`     partial update
+- `PUT    /api/domain-allowlist/{id}/`     update
+- `DELETE /api/domain-allowlist/{id}/`     destroy
 
 ### Filtering / Search / Ordering
 - Filtering: `?domain=asu&description=lab`

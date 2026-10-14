@@ -62,7 +62,7 @@ nav = [
       "core-concepts/index.md",
       { "Backend" = [
         "core-concepts/backend/administration.md",
-        "core-concepts/backend/domain-whitelist.md",
+        "core-concepts/backend/domain-allowlist.md",
         "core-concepts/backend/database.md",
         "core-concepts/backend/datamodel.md",
         "core-concepts/backend/api_endpoints.md",

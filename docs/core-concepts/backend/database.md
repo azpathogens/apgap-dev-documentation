@@ -22,7 +22,7 @@ This document provides a comprehensive view of the ASU APGAP database schema.
 | Access Control | `AccessRequest`, `AccessRequestApprover`                                                                                                                  |
 | Audit          | `Deletion`, `ArchiveRequest`                                                                                                                              |
 | Notifications  | `Notification`, `UserNotificationPreference`                                                                                                              |
-| Other          | `DomainWhitelist`, `SeqeraWorkspace`                                                                                                                      |
+| Other          | `DomainAllowlist`, `SeqeraWorkspace`                                                                                                                      |
 
 ---
 
@@ -416,7 +416,7 @@ This document provides a comprehensive view of the ASU APGAP database schema.
 | created_at                | datetime |                  | Request time              |
 | updated_at                | datetime |                  | Last update               |
 
-### DomainWhitelist
+### DomainAllowlist
 
 | Field       | Type     | Constraints | Description        |
 | ----------- | -------- | ----------- | ------------------ |
