@@ -62,20 +62,35 @@ nav = [
       "core-concepts/index.md",
       { "Backend" = [
         "core-concepts/backend/administration.md",
+        "core-concepts/backend/configuration.md",
         "core-concepts/backend/domain-whitelist.md",
         "core-concepts/backend/database.md",
         "core-concepts/backend/datamodel.md",
         "core-concepts/backend/api_endpoints.md",
+        "core-concepts/backend/permissions/_index.md",
+        "core-concepts/backend/NOTIFICATION_SCENARIOS.md",
         "core-concepts/backend/celery_tasks/_index.md",
         "core-concepts/backend/deployment.md",
         { "Integrations" = [
             "core-concepts/backend/integrations/seqera.md",
           ]
         }
+      ]},
+      { "Frontend" = [
+        "core-concepts/frontend/index.md",
+        "core-concepts/frontend/architecture.md",
+        "core-concepts/frontend/auth-and-http.md",
+        "core-concepts/frontend/routing.md",
+        "core-concepts/frontend/deployment.md",
       ]}
     ]}
   ]},
-  {"Workflows" = "workflows/scrubber.md"}
+  {"Workflows" = [
+    "workflows/ingest-pipeline.md",
+    "workflows/lab-lifecycle.md",
+    "workflows/access-requests.md",
+    "workflows/scrubber.md",
+  ]}
 ]
 
 # With the "extra_css" option you can add your own CSS styling to customize

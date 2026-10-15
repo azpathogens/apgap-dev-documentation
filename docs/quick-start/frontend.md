@@ -61,6 +61,24 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+There are four configurations, each with its own file in `src/environments`: `local` (the default for `ng serve`), `development`, `uat`, and `production` (the default for `ng build`). `environment.template.ts` is not used by any configuration. See [Environments](/core-concepts/frontend/auth-and-http/#environments) for the API URL each one points at.
+
+## Linting, Formatting, and Tests
+
+| Command          | What it does                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run lint`   | Runs ESLint (`eslint.config.mjs`) on `src/` with `--fix`, so it rewrites files it can fix          |
+| `npm run format` | Runs Prettier (`.prettierrc`: single quotes, 2 spaces, 120 character lines) on `src/` and rewrites files |
+| `npm test`       | Runs the Karma and Jasmine unit tests once in headless Chrome (`ng test --watch=false --browsers ChromeHeadless`) |
+| `npx ng test`    | Runs the tests in watch mode in a Chrome window, rerunning on every change                        |
+| `npm run watch`  | Rebuilds the `development` configuration on every change, without a dev server                    |
+
+The tests need Chrome or Chromium installed locally. If Karma cannot find it, set `CHROME_BIN` to its path.
+
+The pre-commit hook runs `npm run lint` and `npm test`, and the pre-push hook runs `npm test`, so run both before you commit to avoid a blocked commit. CI runs the same two commands on every pull request and on pushes to `main` and `development`. See [CI Checks](/core-concepts/frontend/deployment/#ci-checks) and [Husky Hooks](/core-concepts/frontend/deployment/#husky-hooks).
+
+**Important:** the pre-commit hook does not stage the fixes ESLint makes. If `npm run lint` rewrites a file during a commit, review the change and stage it again.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:

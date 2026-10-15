@@ -50,6 +50,25 @@ The entrypoint script runs first and handles database connectivity:
 4. `seed_metadata_templates`, `seed_pathogens`, `seed_validation_rules` - Seeds the metadata vocabulary, in that order
 5. Starts Django development server with `runserver_plus` on port 8000
 
+#### Deployed Containers (GKE)
+
+The image deployed to GKE is built from `deploy.Dockerfile`, not from the `compose/` Dockerfiles, and its entrypoint is the root `entrypoint` script. The Helm django container sets no command, so that script does the whole startup:
+
+1. Builds `DATABASE_URL` from the `POSTGRES_*` variables
+2. Waits for PostgreSQL by retrying a `psycopg` connection every second (the database is reached through a Cloud SQL Auth Proxy sidecar)
+3. `migrate --noinput`
+4. `ensure_adhs_organization`
+5. `setup_permission_groups`
+6. `seed_metadata_templates`, `seed_pathogens`, `seed_validation_rules`, in that order
+7. `seed_report_presets`
+8. Starts Gunicorn on port 8000 with 3 workers and a 120 second timeout
+
+If the container is given a command, the entrypoint runs that command right after the database check and skips steps 3 to 8.
+
+`collectstatic` does not run in the django pod. A separate Helm Job (`helm/templates/collectstatic-job.yaml`) runs it, so uploading static files cannot restart the web pods.
+
+The Celery worker, ingest worker, and beat pods (`helm/templates/celery-*.yaml`) override the container command. They wait for the database proxy with `wait-for-it` and start Celery directly, without running migrations or seeds.
+
 #### Key Management Commands
 
 | Command                    | Description                                                                                                 |
@@ -59,8 +78,38 @@ The entrypoint script runs first and handles database connectivity:
 | `seed_metadata_templates`  | Seeds/updates metadata templates, keys, values, and source types for file metadata                          |
 | `seed_pathogens`           | Seeds the Pathogen registry with reportable pathogens (also populates the pathogen dropdown)                |
 | `seed_validation_rules`    | Seeds/updates field- and cross-field validation rules for metadata templates                                |
+| `seed_report_presets`      | Creates the default Data Explorer report presets. Create only, so presets edited or deleted by admins are not restored |
 
 > Both start scripts run these three on every container start, so a normal setup needs none of them by hand. Order matters: `seed_metadata_templates` first (it creates the keys, source types, and the pathogen key/template), then `seed_pathogens`, then `seed_validation_rules`.
+
+#### Maintenance and Development Commands
+
+These commands never run at startup. Run them by hand when you need them.
+
+| Command                      | Where              | Description                                                                                                                  |
+| ---------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `populate_dummy_data`        | Local only         | Generates organizations, users, labs, projects, datasets, files, and notifications to develop against. See [Sample Data](#sample-data) |
+| `seed_dev_data`              | Local only         | Creates a small fixed set: 3 organizations, 6 users (superuser `admin@asu.edu`, two Lab Directors, two Bioinformatics Users, one Data Analyst), 3 labs, 4 projects, and 4 datasets. Uses `get_or_create`, so re-running it is safe |
+| `migrate_renamed_keys`       | Any environment    | Moves every tag, template, and requirement that points at a metadata key to a renamed key. Takes `old_name:new_name` pairs   |
+| `sync_metadata_renames`      | Any environment    | Reconciles state after a key rename: key aliases, validation issues, saved searches, and dataset subscriptions, then re-evaluates subscriptions against PRIMARY files |
+| `backfill_notification_labs` | Any environment    | Fills in the owning lab on notifications created before notifications had a lab column                                       |
+| `loadtest_uploads`           | Deployed pod only  | Load-tests the upload and ingest pipeline by copying real files into the ingest bucket, waiting for each to finish, and then deleting everything it created |
+
+All of them except `seed_dev_data` and `populate_dummy_data` accept `--dry-run`, which reports what would change without writing anything. Always do a dry run first in a deployed environment.
+
+**Renaming a metadata key.** Run `migrate_renamed_keys` first, then `sync_metadata_renames` with the same pairs:
+
+```bash
+docker compose -f docker-compose.local.yml run --rm django python manage.py migrate_renamed_keys old_name:new_name --dry-run
+docker compose -f docker-compose.local.yml run --rm django python manage.py migrate_renamed_keys old_name:new_name
+docker compose -f docker-compose.local.yml run --rm django python manage.py sync_metadata_renames old_name:new_name --dry-run
+```
+
+`sync_metadata_renames` only reconciles; it does not rename anything. Its last step re-evaluates dynamic dataset subscriptions and has visible side effects (file copies, access requests, notifications). Use `--skip-reeval` to skip it, `--reeval-since YYYY-MM-DD` to limit it to recently promoted files, or `--surface` to run a single step.
+
+**Backfilling notification labs.** `backfill_notification_labs` is a command rather than a data migration because migrations run at pod start and a slow backfill would overrun the startup probe. It commits in batches (`--batch-size`, default 500), so it is safe to interrupt and re-run.
+
+**Load testing uploads.** `loadtest_uploads` needs `ENABLE_GCP_INTERACTIONS`, so run it inside the deployed `django-backend` pod. Pass a source bucket and a target `--lab-id`, and use `--suppress-notifications` for large runs. The full runbook, including how to run it detached and how to clean up an interrupted run with `--cleanup-only`, is in `asu_apgap/uploads/management/commands/loadtest_uploads.md` in the backend repository.
 
 ### Metadata Template Seeding
 
